@@ -6,19 +6,32 @@
 //
 
 import SwiftUI
+import SwiftData
 
 struct ContentView: View {
+    
+    @Environment(\.modelContext) private var modelContext
+    @Query private var items: [Item]
+    
     var body: some View {
-        VStack {
-            Image(systemName: "globe")
-                .imageScale(.large)
-                .foregroundStyle(.tint)
-            Text("Hello, world!")
+        NavigationStack {
+            List {
+                ForEach(items) { item in
+                    Text(item.title)
+                }
+                
+            }.navigationTitle("Grocery List")
+                .overlay {
+                    if items.isEmpty {
+                        ContentUnavailableView("Empty Cart",systemImage: "cart.circle", description: Text("Add some items to the shopping list."))
+                    }
+                }
         }
-        .padding()
+        
     }
 }
 
 #Preview {
     ContentView()
+        .modelContainer(for: Item.self, inMemory: true)
 }
