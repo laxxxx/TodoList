@@ -13,6 +13,14 @@ struct ContentView: View {
     @Environment(\.modelContext) private var modelContext
     @Query private var items: [Item]
     
+    func addEssesntialFoods() {
+        modelContext.insert(Item(title: "Bread", isCompleted: true))
+        modelContext.insert(Item(title: "Chicken Breasts", isCompleted: false))
+        modelContext.insert(Item(title: "Bananas", isCompleted: true))
+        modelContext.insert(Item(title: "Milk", isCompleted: false))
+        modelContext.insert(Item(title: "Cheese", isCompleted: true))
+    }
+    
     var body: some View {
         NavigationStack {
             List {
@@ -24,14 +32,41 @@ struct ContentView: View {
                         .foregroundStyle(item.isCompleted ? Color.accentColor : Color.primary)
                         .strikethrough(item.isCompleted)
                         .italic(item.isCompleted)
+                        .swipeActions {
+                            Button(role: .destructive) {
+                                withAnimation {
+                                    modelContext.delete(item)
+                                }
+                            } label: {
+                                Label("Delete", systemImage: "trash")
+                            }
+                        }
+                        .swipeActions(edge: .leading) {
+                            Button("Done", systemImage: item.isCompleted ? "x.circle" : "checkmark.circle") {
+                                item.isCompleted.toggle()
+                            }
+                            .tint(item.isCompleted ? .red : .accentColor)
+                        }
                 }
                 
-            }.navigationTitle("Grocery List")
-                .overlay {
-                    if items.isEmpty {
-                        ContentUnavailableView("Empty Cart",systemImage: "cart.circle", description: Text("Add some items to the shopping list."))
+            }
+            .navigationTitle("Grocery List")
+            .toolbar {
+                if items.isEmpty {
+                    ToolbarItem(placement: .topBarTrailing) {
+                        Button {
+                            addEssesntialFoods()
+                        } label: {
+                            Label("Essentials", systemImage: "carrot")
+                        }
                     }
                 }
+            }
+            .overlay {
+                if items.isEmpty {
+                    ContentUnavailableView("Empty Cart",systemImage: "cart.circle", description: Text("Add some items to the shopping list."))
+                }
+            }
         }
         
     }
